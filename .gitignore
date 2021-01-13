@@ -1,9 +1,13 @@
 # gradle cache folder
 .gradle/
 
-# IntelliJ IDEA cache folder
+# IntelliJ IDEA-specific stuff
 .idea/
 
-# build folder
+# Eclipse-specific stuff
+.classpath
+.project
+.settings/
 
+# build folder
 build/
