@@ -1,0 +1,9 @@
+# gradle cache folder
+.gradle/
+
+# IntelliJ IDEA cache folder
+.idea/
+
+# build folder
+
+build/
