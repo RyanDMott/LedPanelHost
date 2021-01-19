@@ -51,11 +51,14 @@ bool SerialReceiver::FetchInto(char* bufferStart, int dataLengthPlusOne) {
 		Serial.print(". First data: ");
 		Serial.print((int)bufferStart[0]);
 		Serial.print(". Last data: ");
-		Serial.print((int)bufferStart[dataLengthPlusOne-2]);
-		Serial.print("Full data: ");
+		Serial.print((int)bufferStart[bytesBack-2]);
+		Serial.print(". First ten bytes of data as ints: ");
 		for (int i = 0; i < 10; i++)
-			Serial.print((char)bufferStart[i]);
-		Serial.print(bufferStart);
+    {
+			Serial.print((int)bufferStart[i]);
+      Serial.print(" ");
+    }
+		// Serial.print(bufferStart);
 		Serial.println(".");
 		return false; 
 	}

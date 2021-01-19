@@ -14,6 +14,7 @@ namespace towerccc
 			// WaitForFetchFrom()
 		private:
 			const long baudRate = 1000000;
+      // const long baudRate = 9600;
 			
 			const char startOfTransmission = 2;
 			const char endOfTransmission = 3;

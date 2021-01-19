@@ -1,9 +1,6 @@
 package com.towerccc.ledpanelhost;
 
-import purejavacomm.NoSuchPortException;
-import purejavacomm.PortInUseException;
-import purejavacomm.SerialPort;
-import purejavacomm.CommPortIdentifier;
+import purejavacomm.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +12,13 @@ public class ArduinoComm implements AutoCloseable {
     private SerialPort port;
     private OutputStream outputStream;
     private InputStream inputStream;
+
+    final char STX = (char)2;
+    final char ETX = (char)3;
+    final char ENQ = (char)5;
+    final char ACK = (char)6;
+    final char NAK = (char)21;
+    final char SYN = (char)22;
 
     public ArduinoComm(String portName) throws PortConnectionException {
         CommPortIdentifier portId;
@@ -28,11 +32,20 @@ public class ArduinoComm implements AutoCloseable {
         }
 
         try {
-            port = (SerialPort) portId.open("LedPanelHost", 5000);
+            port = (SerialPort) portId.open("LedPanelHost", 100);
         } catch (PortInUseException e) {
             throw new PortConnectionException(
                 "Could not create connection to Arduino: Port " + portName + " already in use.",
                 e
+            );
+        }
+
+        try {
+            port.setSerialPortParams(1000000, 8, 1, SerialPort.PARITY_NONE);
+        } catch (UnsupportedCommOperationException e) {
+            throw new PortConnectionException(
+                    "Could not configure connection to Arduino.",
+                    e
             );
         }
 
@@ -52,11 +65,74 @@ public class ArduinoComm implements AutoCloseable {
             );
     }
 
+    public int WaitForFetchFrom(byte[] bytesOut){
+        try{
+            System.out.println("Flushing buffer");
+            int available;
+            while((available = inputStream.available()) > 0)
+            {
+                System.out.print(inputStream.read());
+                System.out.print(available);
+                System.out.print(",");
+            }
+
+            System.out.println("Waiting.");
+
+            int b;
+            do
+            {
+                b = inputStream.read();
+                System.out.println(b);
+            }
+            while (b != ENQ);
+
+            for (int i = 1; i < 10; i++)
+                outputStream.write(SYN);
+
+            outputStream.write(STX);
+
+            outputStream.write(bytesOut);
+            // inputStream.Write("abcdefghij");
+            // inputStream.Write(STX.ToString() + "abcdefghij" + ETX.ToString());
+
+            outputStream.write(ETX);
+
+            b = inputStream.read();
+
+            if (b == ACK)
+            {
+                System.out.println("Transmission successful");
+                // System.out.println(inputStream.ReadLine());
+            }
+            else if (b == -1)
+                System.out.println("Timed out waiting for acknowledge");
+            else if (b == NAK)
+            {
+                System.out.println("Transmission complete but unsuccessful:");
+                while(inputStream.available() > 0)
+                    System.out.print((char)inputStream.read());
+            }
+            else
+                System.out.println("Unexpected reply: " + b);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return 0;
+    }
+
     public void HelloWorld() throws IOException {
         outputStream.write("abcd".getBytes());
         byte[] dataReceived = new byte[4];
-        int count = inputStream.read(dataReceived, 0, 4);
-        System.out.println(count);
+        int back, i;
+        for (i = 0; i < 4; i++){
+            back = inputStream.read();
+            if (back == -1)
+                break;
+            dataReceived[i] = (byte) back;
+        }
+        System.out.println(i);
         System.out.println(new String(dataReceived, StandardCharsets.UTF_8));
     }
 
