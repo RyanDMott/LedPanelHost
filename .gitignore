@@ -12,3 +12,6 @@
 # build folder
 build/
 bin/
+
+#data (images)
+data/
