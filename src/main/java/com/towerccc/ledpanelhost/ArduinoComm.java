@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 public class ArduinoComm implements AutoCloseable {
     private SerialPort port;
@@ -41,7 +42,7 @@ public class ArduinoComm implements AutoCloseable {
         }
 
         try {
-            port.setSerialPortParams(1000000, 8, 1, SerialPort.PARITY_NONE);
+            port.setSerialPortParams(115200, 8, 1, SerialPort.PARITY_NONE);
         } catch (UnsupportedCommOperationException e) {
             throw new PortConnectionException(
                     "Could not configure connection to Arduino.",
@@ -76,18 +77,22 @@ public class ArduinoComm implements AutoCloseable {
                 System.out.print(",");
             }
 
-            System.out.println("Waiting.");
-
             int b;
-            do
-            {
-                b = inputStream.read();
-                System.out.println(b);
-            }
-            while (b != ENQ);
 
-            for (int i = 1; i < 10; i++)
+            System.out.println("Waiting.");
+            while(true)
+            {
                 outputStream.write(SYN);
+                if (inputStream.available() <= 0)
+                    continue;
+                b = inputStream.read();
+
+                if (b == ENQ)
+                    break;
+                else
+                    System.out.println(b);
+            }
+
 
             outputStream.write(STX);
 
@@ -97,9 +102,15 @@ public class ArduinoComm implements AutoCloseable {
 
             outputStream.write(ETX);
 
-            b = inputStream.read();
+            System.out.println("Wrote");
 
-            if (b == ACK)
+            TimeUnit.MILLISECONDS.sleep(10);
+
+            if (inputStream.available() <= 0)
+            {
+                System.out.println("No response");
+            }
+            else if ((b = inputStream.read()) == ACK)
             {
                 System.out.println("Transmission successful");
                 // System.out.println(inputStream.ReadLine());
@@ -116,6 +127,9 @@ public class ArduinoComm implements AutoCloseable {
                 System.out.println("Unexpected reply: " + b);
 
         } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        } catch (InterruptedException e) {
             e.printStackTrace();
             return -1;
         }

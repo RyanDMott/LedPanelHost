@@ -32,8 +32,12 @@ void setup() {
   byte buffer[BUFFER_SIZE];
   while(true)
   {
+    FastLED.delay(10);
     if (!receiver.FetchInto(buffer, BUFFER_SIZE))
-      continue;
+    {
+      continue;      
+    }
+      
 
     int i;
     for(i = 0; i < LED_COUNT; i++)
@@ -44,7 +48,6 @@ void setup() {
     }
   
     FastLED.show();
-    break;
   }  
 }
 

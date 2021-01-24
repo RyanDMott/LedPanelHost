@@ -10,23 +10,30 @@ SerialReceiver::SerialReceiver()
 }
 
 void SerialReceiver::Flush() {
-	while(Serial.read() != timeout);
+	while(Serial.available() > 0 && Serial.read() != timeout);
 }
 
 bool SerialReceiver::Enquire() {
-	Serial.print(enquiry);
-	long readsToWaitAfterEnq = 40000;
-	while(Serial.read() != startOfTransmission)
-		if (--readsToWaitAfterEnq)
+  long readsToWaitAfterEnq = 2000;
+  if (Serial.available() <= 0)
+    return false;
+    
+  if (Serial.read() != sync)
+    return false;
+    
+  Serial.print(enquiry);
+  char printed;
+	while((printed = Serial.read()) == sync)    
+    if (--readsToWaitAfterEnq)
 			continue;
 		else
 			return false;
 	
-	return true;
+	return printed == startOfTransmission;
 }
 
 bool SerialReceiver::FetchInto(char* bufferStart, int dataLengthPlusOne) {
-	Flush();
+  Flush();
 	if (!Enquire())
 		return false;
 	
