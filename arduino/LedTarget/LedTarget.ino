@@ -42,7 +42,8 @@ void setup() {
   while(true)
   {
     // receiver.FetchInto(buffer, LED_COUNT + 1);
-    receiver.FetchInto(buffer, BUFFER_SIZE);
+    if(!receiver.FetchInto(buffer, BUFFER_SIZE))
+      continue;
 
     int i;
     for(i = 0; i < LED_COUNT; i++)
