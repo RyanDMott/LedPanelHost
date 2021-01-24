@@ -15,7 +15,7 @@ void SerialReceiver::Flush() {
 
 bool SerialReceiver::Enquire() {
 	Serial.print(enquiry);
-	long readsToWaitAfterEnq = 20000;
+	long readsToWaitAfterEnq = 40000;
 	while(Serial.read() != startOfTransmission)
 		if (--readsToWaitAfterEnq)
 			continue;
