@@ -14,8 +14,7 @@ void SerialReceiver::Flush() {
 }
 
 bool SerialReceiver::Enquire() {
-  long readsToWaitAfterEnq = 100000;
-  long timeoutsToWaitAfterEnq = 100000;
+  long readsToWaitAfterEnq = 10000;
   int printed;
   if (Serial.available() <= 0)
   {
@@ -31,28 +30,18 @@ bool SerialReceiver::Enquire() {
   }    
     
   Serial.print(enquiry);
-    
-	while((printed = Serial.read()) || (printed == -1))
-    /*
-    if ((printed == -1) && (--timeoutsToWaitAfterEnq > 0))
-    {
-      continue;
-    }      
-    else if ((printed == -1) && (timeoutsToWaitAfterEnq <= 0))
-    {
-      Serial.println("Waited too long for more syncs");
-      return false;
-    }
-    else 
-    */
-    if (--readsToWaitAfterEnq <= 0)
+
+  int readsTaken = 0;
+	while((printed = Serial.read()) == sync || (printed == -1))
+    if (--readsToWaitAfterEnq)
 		{
-      Serial.println("Waited for too many syncs");
-      return false;
+		  readsTaken++;
+		  continue;
 		}
 		else
     {
-      continue;
+      Serial.println("Waited for too many syncs");
+      return false;
     }
     			
 	if (printed != startOfTransmission)

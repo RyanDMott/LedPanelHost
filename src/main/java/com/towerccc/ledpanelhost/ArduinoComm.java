@@ -43,6 +43,7 @@ public class ArduinoComm implements AutoCloseable {
 
         try {
             port.setSerialPortParams(115200, 8, 1, SerialPort.PARITY_NONE);
+            // port.setSerialPortParams(9600, 8, 1, SerialPort.PARITY_NONE);
         } catch (UnsupportedCommOperationException e) {
             throw new PortConnectionException(
                     "Could not configure connection to Arduino.",
@@ -72,27 +73,36 @@ public class ArduinoComm implements AutoCloseable {
             int available;
             while((available = inputStream.available()) > 0)
             {
-                System.out.print(inputStream.read());
-                System.out.print(available);
+                System.out.print((char)inputStream.read());
+                // System.out.print(available);
                 System.out.print(",");
             }
 
             int b;
 
-            System.out.println("Waiting.");
+            // System.out.println("Waiting.");
+
+            for (int i = 0; i < 10; i++)
+                outputStream.write(SYN);
+
             while(true)
             {
-                outputStream.write(SYN);
                 if (inputStream.available() <= 0)
+                {
+                    // TimeUnit.MILLISECONDS.sleep(1);
                     continue;
+                }
                 b = inputStream.read();
-
                 if (b == ENQ)
                     break;
                 else
-                    System.out.println(b);
+                    System.out.println((char)b);
             }
+            // outputStream.write(ACK);
+            // TimeUnit.MILLISECONDS.sleep(1000);
 
+            for (int i = 0; i < 10; i++)
+                outputStream.write(SYN);
 
             outputStream.write(STX);
 
@@ -104,12 +114,16 @@ public class ArduinoComm implements AutoCloseable {
 
             System.out.println("Wrote");
 
-            TimeUnit.MILLISECONDS.sleep(10);
 
-            if (inputStream.available() <= 0)
+            int msToWait = 1000;
+            int msPerWait = 10;
+            while (inputStream.available() <= 0 && msToWait > 0)
             {
-                System.out.println("No response");
+                TimeUnit.MILLISECONDS.sleep(msPerWait);
+                msToWait -= msPerWait;
             }
+            if (inputStream.available() <= 0)
+                System.out.println("No response");
             else if ((b = inputStream.read()) == ACK)
             {
                 System.out.println("Transmission successful");
@@ -120,11 +134,18 @@ public class ArduinoComm implements AutoCloseable {
             else if (b == NAK)
             {
                 System.out.println("Transmission complete but unsuccessful:");
-                while(inputStream.available() > 0)
-                    System.out.print((char)inputStream.read());
             }
             else
-                System.out.println("Unexpected reply: " + b);
+            {
+                System.out.print("Unexpected reply: ");
+                System.out.print((int)b);
+                System.out.print(",");
+                System.out.print((char)b);
+                System.out.print(",");
+            }
+
+            while(inputStream.available() > 0)
+                System.out.print((char)inputStream.read());
 
         } catch (IOException e) {
             e.printStackTrace();

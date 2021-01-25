@@ -32,7 +32,7 @@ public class IntegrationTestRunner {
         // panel.SetPixel(0, 1, new RgbColor(9, 0, 0));
         // ColorModel colorModel = image.getColorModel();
         try (ArduinoComm comm = new ArduinoComm("COM3")) {
-            for (int shift = 8*32; shift >= 0 ; shift--) {
+            for (int shift = 0*8*32; shift >= 0 ; shift--) {
                 for (int row = 0; row < image.getHeight(); row++) {
                     for (int column = 0; column < image.getWidth(); column++) {
                         Color colorBuiltin = new Color(image.getRGB(column, row));
