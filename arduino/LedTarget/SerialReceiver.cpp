@@ -14,26 +14,61 @@ void SerialReceiver::Flush() {
 }
 
 bool SerialReceiver::Enquire() {
-  long readsToWaitAfterEnq = 2000;
+  long readsToWaitAfterEnq = 100000;
+  long timeoutsToWaitAfterEnq = 100000;
+  int printed;
   if (Serial.available() <= 0)
+  {
+    // Serial.println("Nothing there.");          
     return false;
+  }
     
   if (Serial.read() != sync)
+  {
+    // Serial.print("Open with sync, not ");
+    // Serial.println((int)printed);
     return false;
+  }    
     
   Serial.print(enquiry);
-  char printed;
-	while((printed = Serial.read()) == sync)    
-    if (--readsToWaitAfterEnq)
-			continue;
+    
+	while((printed = Serial.read()) || (printed == -1))
+    /*
+    if ((printed == -1) && (--timeoutsToWaitAfterEnq > 0))
+    {
+      continue;
+    }      
+    else if ((printed == -1) && (timeoutsToWaitAfterEnq <= 0))
+    {
+      Serial.println("Waited too long for more syncs");
+      return false;
+    }
+    else 
+    */
+    if (--readsToWaitAfterEnq <= 0)
+		{
+      Serial.println("Waited for too many syncs");
+      return false;
+		}
 		else
-			return false;
-	
-	return printed == startOfTransmission;
+    {
+      continue;
+    }
+    			
+	if (printed != startOfTransmission)
+  {
+    // Serial.print(readsTaken);
+    // Serial.print(int(printed));
+    Serial.print("Should not follow a sync byte: '");
+    Serial.print(int(printed));
+    Serial.println("'.");
+    return false;
+  }
+	return true;
 }
 
-bool SerialReceiver::FetchInto(char* bufferStart, int dataLengthPlusOne) {
-  Flush();
+bool SerialReceiver::FetchInto(char* bufferStart, int dataLengthPlusOne) {  
+  // Flush();
 	if (!Enquire())
 		return false;
 	
