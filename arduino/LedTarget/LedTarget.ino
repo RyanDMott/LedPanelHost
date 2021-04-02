@@ -46,8 +46,8 @@ void setup() {
   
   while(true)
   {    
-    // FastLED.delay(10);
-    delay(100);
+    FastLED.delay(10);
+    // delay(100);
     toggleLedState();
     if (!receiver.FetchInto(buffer, BUFFER_SIZE))
       continue;      
