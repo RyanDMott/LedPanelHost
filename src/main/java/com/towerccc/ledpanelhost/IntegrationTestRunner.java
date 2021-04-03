@@ -20,7 +20,7 @@ public class IntegrationTestRunner {
     public static void TestConnection(){
         BufferedImage image;
         try {
-             image = ImageIO.read(new File("C:\\Users\\ryan\\source\\repos\\LedPanelHost\\data\\panel_scan_check.png"));
+             image = ImageIO.read(new File("C:\\Users\\ryan\\source\\repos\\LedPanelHost\\data\\momo1_back.png"));
         } catch (IOException e) {
             e.printStackTrace();
             return;

@@ -31,7 +31,7 @@ void setup() {
   toggleLedState();
   delay( 3000 ); // power-up safety delay
   toggleLedState();
-  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, LED_COUNT).setCorrection( TypicalSMD5050 );
+  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, LED_COUNT);
   FastLED.setBrightness( BRIGHTNESS );
 
   // put your setup code here, to run once:
@@ -51,6 +51,14 @@ void setup() {
     toggleLedState();
     if (!receiver.FetchInto((byte*) &(leds[0].red), BUFFER_SIZE))
       continue;      
+
+    // Cheap (ie. fast) gamma correction (contrast adjustment) that can be run right before calling FastLED.show()
+    for (uint16_t i = 0; i < LED_COUNT; i++)
+    {
+      leds[i].r = dim8_video(leds[i].r);
+      leds[i].g = dim8_video(leds[i].g);
+      leds[i].b = dim8_video(leds[i].b);
+    }
 
     FastLED.show();    
   }  
