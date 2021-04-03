@@ -14,7 +14,7 @@ void SerialReceiver::Flush() {
 }
 
 bool SerialReceiver::Enquire() {
-  long readsToWaitAfterEnq = 10000;
+  long readsToWaitAfterEnq = 40000;
   int printed;
   if (Serial.available() <= 0)
   {
