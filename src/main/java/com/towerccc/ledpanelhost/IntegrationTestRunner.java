@@ -28,18 +28,18 @@ public class IntegrationTestRunner {
 
         RgbColor color = new RgbColor();
 
-        LedPanelWriter<RgbColor> panel = new LedPanelWriter<>(8,32, color);
+        LedPanelWriter<RgbColor> panel = new LedPanelWriter<>(8,8, color);
         // panel.SetPixel(0, 1, new RgbColor(9, 0, 0));
         // ColorModel colorModel = image.getColorModel();
         try (ArduinoComm comm = new ArduinoComm("COM3")) {
-            for (int shift = 0*8*32; shift >= 0 ; shift--) {
+            for (int shift = 1*8*32; shift >= 0 ; shift--) {
                 for (int row = 0; row < image.getHeight(); row++) {
-                    for (int column = 0; column < image.getWidth(); column++) {
+                    for (int column = 0; column < 8; column++) {
                         Color colorBuiltin = new Color(image.getRGB(column, row));
                         color.Red = (byte) colorBuiltin.getRed();
                         color.Blue = (byte) colorBuiltin.getBlue();
                         color.Green = (byte) colorBuiltin.getGreen();
-                        panel.SetPixel((7 - row) % 8, (31 - column + shift) % 32, color);
+                        panel.SetPixel((7 - row) % 8, (7 - column + shift) % 16, color);
                     }
                 }
                 // comm.HelloWorld();

@@ -3,7 +3,7 @@
 
 using namespace towerccc::LED;
 
-#define LED_COUNT (8*32)
+#define LED_COUNT (8*8)
 #define BYTES_PER_LED 3
 #define BUFFER_SIZE (LED_COUNT * BYTES_PER_LED + 1)
 
@@ -16,7 +16,7 @@ CRGB leds[LED_COUNT];
 #define INDICATOR_PIN 13
 
 // NeoPixel brightness, 0 (min) to 255 (max)
-#define BRIGHTNESS 16
+#define BRIGHTNESS 8
 
 bool ledState;
 
@@ -37,16 +37,17 @@ void setup() {
   // put your setup code here, to run once:
   
   for(int i = 0; i < LED_COUNT; i++)
-    leds[i] = CRGB(10,0,0);
+    leds[i] = CRGB(1,0,0);
 
   FastLED.show();
-    
+  FastLED.delay(1000);
+  
   SerialReceiver receiver = SerialReceiver();
   byte buffer[BUFFER_SIZE];
   
   while(true)
   {    
-    FastLED.delay(10);
+    FastLED.delay(100);
     // delay(100);
     toggleLedState();
     if (!receiver.FetchInto(buffer, BUFFER_SIZE))
